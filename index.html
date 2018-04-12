@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./css/css.css" />
+</head>
+
+<body>
+
+    <div class="jumbotron text-center margin0">
+        <h1>Color of cats</h1>
+    </div>
+
+    <form id="frm1" action="/action_page.php">
+        <div class="container">
+                <div class="row marginTop20">
+                <div class="col-xs-1">
+                    <label>Name</label>
+                </div>
+                <div class="col-xs-4"><input type="text" name="Name" class="form-control" id="name"></div>
+                <div class="col-xs-2"></div>
+                <div class="col-xs-1"><label>Color</label></div>
+                <div class="col-xs-4"><input type="text" name="Color" class="form-control" id="color"></div>
+            </div>
+
+            <div class="marginTop30">
+                <button type="button" class="btn btn-warning button" id="search" onclick="getData()">
+                <span class="glyphicon glyphicon-search"></span>
+                Search
+            </button>
+                <button type="button" class="btn btn-danger button" id="delete" onclick="deleteData()">
+                <span class="glyphicon glyphicon-remove"></span>
+                Delete
+            </button>
+                <button type="button" class="btn btn-info button" id="myAddbtn" onclick="myAddFunction()">
+                <span class="glyphicon glyphicon-plus"></span>
+                Add
+            </button>
+            </div>
+			<p id="demo"></p>
+        </div>
+    </form>
+	<script>
+	
+		function getData() {
+            var name = document.getElementById("name").value;
+			console.log(name)
+            var xhttp = new XMLHttpRequest();
+			
+            xhttp.open("GET", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat?name="+name, true);
+			
+            xhttp.setRequestHeader("Content-type", "application/json", true);
+            xhttp.setRequestHeader("Authorization", "Basic MjNiYzQ2YjEtNzFmNi00ZWQ1LThjNTQtODE2YWE0ZjhjNTAyOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=");
+			
+            xhttp.onreadystatechange = function() {
+                    if(xhttp.readyState == 4 && xhttp.status = 200) {
+						console.log(xhttp.responseText);
+                        var data = JSON.parse(xhttp.responseText);
+                        formatToTable(data);
+                    }
+            }
+            xhttp.send();
+
+        }
+
+        function formatToTable(var data) {
+            var thisElement = document.getElementById('table-container');
+            thisElement.innerHTML = "<table>";
+            var count = Object.keys(data).length;                   
+            var keys = Object.keys(data);
+        
+            for (var x = 0; x < count; x++){
+                    if (keys[x].localeCompare("body") == 0){
+                    thisElement.innerHTML = thisElement.innerHTML + "<tr><td>"+ data.body.id + "</td>  <td>" + data.body.name + "</td>  <td>" + data.body.color + "</td></tr>";
+            };
+            thisElement.innerHTML = thisElement.innerHTML + "</table>";
+            }
+        }
+
+		function deleteData() {}
+</script>
+</body>
+
+</html>
