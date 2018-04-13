@@ -37,28 +37,84 @@
                 <span class="glyphicon glyphicon-remove"></span>
                 Delete
             </button>
-                <button type="button" class="btn btn-info button" id="myAddbtn" onclick="myAddFunction()">
+                <button type="button" class="btn btn-info button" id="myAddbtn" onclick="addData()">
                 <span class="glyphicon glyphicon-plus"></span>
                 Add
+            </button>
+			<button type="button" class="btn btn-warning button" id="search" onclick="showData()">
+                <span class="glyphicon glyphicon-search"></span>
+                Show Data
             </button>
             </div>
 			<p id="demo"></p>
         </div>
     </form>
+	
+	<div class="container" id="table-container">
+
+        <table class="table table-hover" id="cat-table">
+            <tr>
+				<th class="pr-md-3 pr-5">
+					<input type="checkbox" class="filled-in" id="checkboxAll">
+					<label for="checkboxAll" class="label-table"></label>
+				</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Color</th>
+            </tr>
+
+        <tbody id="data">
+			
+        </tbody>
+
+        </table>
+
+    </div>
+
+
 	<script>
+		function addData() {
+			var name = document.getElementById("name").value;
+			var color = document.getElementById("color").value;
+			
+			var data = JSON.stringify({"name": ""+name, "color": ""+color});
+			console.log("addData: "+data);
+			var xhttp = new XMLHttpRequest();
+			xhttp.open("POST", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat", true);
+			
+			xhttp.setRequestHeader("Content-type", "application/json");
+			xhttp.setRequestHeader("Authorization", "Basic MjNiYzQ2YjEtNzFmNi00ZWQ1LThjNTQtODE2YWE0ZjhjNTAyOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=");
+			
+			xhttp.onload = function() {
+				var cat_name = JSON.parse(xhttp.responseText);
+				console.log("addData: "+xhttp.responseText);
+				
+				if (xhttp.readyState == 4 && xhttp.status == 201) {
+					console.table(cat_name);
+				
+				} else {
+					console.error(cat_name);
+				}
+			
+			}
+			
+			xhttp.send(data);
+			alert("Insert "+name+" "+ color+ " successfully");
+		}
+	
 	
 		function getData() {
             var name = document.getElementById("name").value;
 			console.log(name)
             var xhttp = new XMLHttpRequest();
 			
-            xhttp.open("GET", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat?name="+name, true);
+            xhttp.open("GET", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat-get-action?name="+name, true);
 			
             xhttp.setRequestHeader("Content-type", "application/json", true);
             xhttp.setRequestHeader("Authorization", "Basic MjNiYzQ2YjEtNzFmNi00ZWQ1LThjNTQtODE2YWE0ZjhjNTAyOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=");
 			
             xhttp.onreadystatechange = function() {
-                    if(xhttp.readyState == 4 && xhttp.status = 200) {
+                    if(xhttp.readyState == 4 && xhttp.status == 200) {
 						console.log(xhttp.responseText);
                         var data = JSON.parse(xhttp.responseText);
                         formatToTable(data);
@@ -68,21 +124,99 @@
 
         }
 
-        function formatToTable(var data) {
-            var thisElement = document.getElementById('table-container');
-            thisElement.innerHTML = "<table>";
+        function formatToTable(data) {
             var count = Object.keys(data).length;                   
             var keys = Object.keys(data);
         
+			var html = "";
             for (var x = 0; x < count; x++){
                     if (keys[x].localeCompare("body") == 0){
-                    thisElement.innerHTML = thisElement.innerHTML + "<tr><td>"+ data.body.id + "</td>  <td>" + data.body.name + "</td>  <td>" + data.body.color + "</td></tr>";
-            };
-            thisElement.innerHTML = thisElement.innerHTML + "</table>";
+						var id = data.body.id;
+						var name = data.body.name;
+						var color = data.body.color;
+						
+						html +="<tr>";
+                           html += "<td>"+id + "</td>";
+                           html += "<td>"+ name + "</td>";
+                           html += "<td>" + color + "</td>";
+						html += "</tr>";
+                     
+						document.getElementById("data").innerHTML = html; 
+					
+					};
             }
         }
 
-		function deleteData() {}
+		function formatToTable2(data) {
+            var count = Object.keys(data).length;                   
+            var keys = Object.keys(data);
+        
+			var html ="";
+            for (var x = 0; x < count; x++){
+                if (keys[x].localeCompare("body") == 0){
+					for (var y = 0, len = data.body.length; y < len; y++) {
+						console.log("TB2: "+ data.body[y].name);
+						var id = data.body[y].id;
+						var name = data.body[y].name;
+						var color = data.body[y].color;
+						
+						html +="<tr>";
+							html += '<th class="pr-md-3 pr-5">'
+								 +	'<input type="checkbox" class="filled-in" id="checkboxItem">'
+								+		'<label for="checkboxItem" class="label-table"></label>'
+								+'</th>';
+							html += "<td>"+id + "</td>";
+							html += "<td>"+ name + "</td>";
+							html += "<td>" + color + "</td>";
+                        html += "</tr>";
+                        
+                        document.getElementById("data").innerHTML = html;
+
+					}
+				};
+            
+            }
+        }
+		
+		function showData() {
+            var xhttp = new XMLHttpRequest();
+			
+            xhttp.open("GET", " http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat", true);
+			
+            xhttp.setRequestHeader("Content-type", "application/json", true);
+            xhttp.setRequestHeader("Authorization", "Basic MjNiYzQ2YjEtNzFmNi00ZWQ1LThjNTQtODE2YWE0ZjhjNTAyOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=");
+			
+            xhttp.onreadystatechange = function() {
+                    if(xhttp.readyState == 4 && xhttp.status == 200) {
+						console.log("ShowData: "+xhttp.responseText);
+                        var data = JSON.parse(xhttp.responseText);
+                        formatToTable2(data);
+                    }
+            }
+            xhttp.send();
+        }
+		function deleteData() {
+			var name = document.getElementById("name").value;
+			console.log(name)
+            var xhttp = new XMLHttpRequest();
+			
+            xhttp.open("DELETE", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat?id="+id, true);
+			
+            xhttp.setRequestHeader("Content-type", "application/json", true);
+            xhttp.setRequestHeader("Authorization", "Basic MjNiYzQ2YjEtNzFmNi00ZWQ1LThjNTQtODE2YWE0ZjhjNTAyOjEyM3pPM3haQ0xyTU42djJCS0sxZFhZRnBYbFBrY2NPRnFtMTJDZEFzTWdSVTRWck5aOWx5R1ZDR3VNREdJd1A=");
+			
+            xhttp.onload = function() {
+                    if(xhttp.readyState == 4 && xhttp.status == 200) {
+						console.log(xhttp.responseText);
+                        var data = JSON.parse(xhttp.responseText);
+                        console.table(cat_name);
+                    } else {
+						console.error(cat_name);
+					}
+            }
+            xhttp.send(null);
+		}
+		
 </script>
 </body>
 
