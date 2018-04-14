@@ -100,6 +100,9 @@
 			
 			xhttp.send(data);
 			alert("Insert "+name+" "+ color+ " successfully");
+			
+			//call getData to show in a table
+			showData();
 		}
 	
 	
@@ -136,6 +139,10 @@
 						var color = data.body.color;
 						
 						html +="<tr>";
+			    html += '<th class="pr-md-3 pr-5">'
+								 +	'<input type="checkbox" class="filled-in" id="checkboxItem">'
+								+		'<label for="checkboxItem" class="label-table"></label>'
+								+'</th>';
                            html += "<td>"+id + "</td>";
                            html += "<td>"+ name + "</td>";
                            html += "<td>" + color + "</td>";
@@ -196,7 +203,7 @@
             xhttp.send();
         }
 		function deleteData() {
-			var name = document.getElementById("name").value;
+			var item = document.getElementById("checkboxItem").value;
 			console.log(name)
             var xhttp = new XMLHttpRequest();
 			
@@ -216,6 +223,27 @@
             }
             xhttp.send(null);
 		}
+		
+	function confirmDelete() {
+		 var x = confirm("Are you sure you want to delete?");
+  if (x){
+  		var aObj = document.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        console.log("aObj: "+ document.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
+        var i=aObj.length; 
+        console.log("length: "+i)
+        while(i--) { 
+        	var item = aObj[i].getElementsByTagName('input')[0];
+    if( item.checked) {
+        aObj[i].parentNode.removeChild(aObj[i]);
+        }
+	}
+  //	  document.getElementById("cat-table").deleteRow();
+      return true;
+  }else{
+    return false;
+    }
+	
+	}
 		
 </script>
 </body>
