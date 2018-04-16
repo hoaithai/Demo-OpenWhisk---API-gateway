@@ -33,7 +33,7 @@
                 <span class="glyphicon glyphicon-search"></span>
                 Search
             </button>
-                <button type="button" class="btn btn-danger button" id="delete" onclick="deleteData()">
+                <button type="button" class="btn btn-danger button" id="delete" onclick="confirmDelete()">
                 <span class="glyphicon glyphicon-remove"></span>
                 Delete
             </button>
@@ -46,7 +46,7 @@
                 Show Data
             </button>
             </div>
-			<p id="demo"></p>
+			
         </div>
     </form>
 	
@@ -55,7 +55,7 @@
         <table class="table table-hover" id="cat-table">
             <tr>
 				<th class="pr-md-3 pr-5">
-					<input type="checkbox" class="filled-in" id="checkboxAll">
+					<input type="checkbox" class="filled-in" name="check_all" id="checkboxAll" onclick="checkAll(this)">
 					<label for="checkboxAll" class="label-table"></label>
 				</th>
                 <th>ID</th>
@@ -78,7 +78,7 @@
 			var color = document.getElementById("color").value;
 			
 			var data = JSON.stringify({"name": ""+name, "color": ""+color});
-			console.log("addData: "+data);
+			//console.log("addData: "+data);
 			var xhttp = new XMLHttpRequest();
 			xhttp.open("POST", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat", true);
 			
@@ -87,7 +87,7 @@
 			
 			xhttp.onload = function() {
 				var cat_name = JSON.parse(xhttp.responseText);
-				console.log("addData: "+xhttp.responseText);
+				//console.log("addData: "+xhttp.responseText);
 				
 				if (xhttp.readyState == 4 && xhttp.status == 201) {
 					console.table(cat_name);
@@ -101,8 +101,11 @@
 			xhttp.send(data);
 			alert("Insert "+name+" "+ color+ " successfully");
 			
-			//call getData to show in a table
-			showData();
+			document.getElementById("name").value = "";
+			document.getElementById("color").value= "";
+			
+			//showData();
+			
 		}
 	
 	
@@ -118,13 +121,14 @@
 			
             xhttp.onreadystatechange = function() {
                     if(xhttp.readyState == 4 && xhttp.status == 200) {
-						console.log(xhttp.responseText);
+						//console.log(xhttp.responseText);
                         var data = JSON.parse(xhttp.responseText);
                         formatToTable(data);
                     }
             }
             xhttp.send();
 
+			document.getElementById("name").value = "";
         }
 
         function formatToTable(data) {
@@ -138,11 +142,11 @@
 						var name = data.body.name;
 						var color = data.body.color;
 						
-						html +="<tr>";
-			    html += '<th class="pr-md-3 pr-5">'
-								 +	'<input type="checkbox" class="filled-in" id="checkboxItem">'
+						html +='<tr id="item">';
+						html += '<td class="pr-md-3 pr-5">'
+								 +	'<input type="checkbox" class="filled-in" name="check_item" attr_id="'+id+'">'
 								+		'<label for="checkboxItem" class="label-table"></label>'
-								+'</th>';
+								+'</td>';
                            html += "<td>"+id + "</td>";
                            html += "<td>"+ name + "</td>";
                            html += "<td>" + color + "</td>";
@@ -162,16 +166,16 @@
             for (var x = 0; x < count; x++){
                 if (keys[x].localeCompare("body") == 0){
 					for (var y = 0, len = data.body.length; y < len; y++) {
-						console.log("TB2: "+ data.body[y].name);
+						//console.log("TB2: "+ data.body[y].name);
 						var id = data.body[y].id;
 						var name = data.body[y].name;
 						var color = data.body[y].color;
 						
-						html +="<tr>";
-							html += '<th class="pr-md-3 pr-5">'
-								 +	'<input type="checkbox" class="filled-in" id="checkboxItem">'
+						html +='<tr id="item">';
+							html += '<td class="pr-md-3 pr-5">'
+								 +	'<input type="checkbox" class="filled-in" name="check_item" attr_id="'+id+'">'
 								+		'<label for="checkboxItem" class="label-table"></label>'
-								+'</th>';
+								+'</td>';
 							html += "<td>"+id + "</td>";
 							html += "<td>"+ name + "</td>";
 							html += "<td>" + color + "</td>";
@@ -195,15 +199,28 @@
 			
             xhttp.onreadystatechange = function() {
                     if(xhttp.readyState == 4 && xhttp.status == 200) {
-						console.log("ShowData: "+xhttp.responseText);
+						//console.log("ShowData: "+xhttp.responseText);
                         var data = JSON.parse(xhttp.responseText);
                         formatToTable2(data);
                     }
             }
             xhttp.send();
         }
+		
+		function checkAll(source) {
+			console.log("checkbox: "+source);
+			var checkboxes = document.getElementsByName("check_item");
+			
+			console.log("checkbox: "+checkboxes);
+			console.log("checkbox: "+checkboxes.length);
+			for (var i = 0, n = checkboxes.length; i < n; i++) {
+					checkboxes[i].checked = source.checked;
+			}
+		
+		}
+		
 		function deleteData() {
-			var item = document.getElementById("checkboxItem").value;
+			var name = document.getElementById("name").value;
 			console.log(name)
             var xhttp = new XMLHttpRequest();
 			
@@ -224,27 +241,38 @@
             xhttp.send(null);
 		}
 		
-	function confirmDelete() {
-		 var x = confirm("Are you sure you want to delete?");
-  if (x){
-  		var aObj = document.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-        console.log("aObj: "+ document.getElementsByTagName('tbody')[0].getElementsByTagName('tr'));
-        var i=aObj.length; 
-        console.log("length: "+i)
-        while(i--) { 
-        	var item = aObj[i].getElementsByTagName('input')[0];
-    if( item.checked) {
-        aObj[i].parentNode.removeChild(aObj[i]);
-        }
-	}
-  //	  document.getElementById("cat-table").deleteRow();
-      return true;
-  }else{
-    return false;
-    }
-	
-	}
-		
+		function confirmDelete() {
+			var x = confirm("Are you sure you want to delete?");
+			
+			if(x) {
+				$('#cat-table [type="checkbox"]').each(function(i, chk) {
+					if (chk.checked) {
+					  console.log("Checked!", i, chk);
+					  var id = $(this).attr('attr_id');
+					  console.log(id);
+					  
+					  var xhttp = new XMLHttpRequest();
+			
+							xhttp.open("DELETE", "http://107.113.53.67:9001/api/23bc46b1-71f6-4ed5-8c54-816aa4f8c502/v1/cat?id="+id, true);
+						
+							xhttp.onload = function() {
+								if (xhttp.readyState == 4 && xhttp.status == 200) {
+									console.log(xhttp.responseText);
+									var data = JSON.parse(xhttp.responseText);
+									console.table(id);
+								} else {
+									console.error(id);
+								}
+							}	
+							xhttp.send(null);
+					}
+					
+				});
+				return true;
+			} else {
+				return false;
+			}	
+		}				
 </script>
 </body>
 
